@@ -13,11 +13,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 
 from community_hub.config import Settings
 from community_hub.logging_config import configure_logging
-from community_hub.routes import salons, curricula, community, api
+from community_hub.routes import salons, curricula, community, api, feeds, live
 from community_hub.routes import search as search_routes
 from community_hub.routes import syllabus as syllabus_routes
 
@@ -34,7 +37,7 @@ SessionLocal: async_sessionmaker | None = None
 async def lifespan(app: FastAPI):
     global engine, SessionLocal
     configure_logging(debug=Settings.DEBUG)
-    logger.info("ORGAN-VI Community Hub starting", extra={"version": "0.2.0"})
+    logger.info("ORGAN-VI Community Hub starting", extra={"version": "0.4.0"})
     db_url = Settings.require_db()
     engine = create_async_engine(db_url, pool_size=5, max_overflow=10)
     SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
@@ -51,7 +54,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="ORGAN-VI Community Hub",
         description="Community portal for salons, reading groups, and contributor stats",
-        version="0.2.0",
+        version="0.4.0",
         lifespan=lifespan,
     )
 
@@ -61,9 +64,14 @@ def create_app() -> FastAPI:
         app.add_middleware(
             CORSMiddleware,
             allow_origins=allowed_origins,
-            allow_methods=["GET"],
+            allow_methods=["GET", "POST"],
             allow_headers=["*"],
         )
+
+    # Rate limiting
+    limiter = Limiter(key_func=get_remote_address)
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
     templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
     app.state.templates = templates
@@ -118,6 +126,8 @@ def create_app() -> FastAPI:
     app.include_router(api.router, prefix="/api", tags=["api"])
     app.include_router(search_routes.router, tags=["search"])
     app.include_router(syllabus_routes.router, tags=["syllabus"])
+    app.include_router(feeds.router, tags=["feeds"])
+    app.include_router(live.router, tags=["live"])
 
     @app.get("/")
     async def index(request: Request):

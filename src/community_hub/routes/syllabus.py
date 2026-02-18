@@ -2,143 +2,16 @@
 
 from __future__ import annotations
 
-from uuid import uuid4
-
 from fastapi import APIRouter, HTTPException, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy import select
 
-from koinonia_db.models.salon import TaxonomyNodeRow
-from koinonia_db.models.reading import Entry
 from koinonia_db.models.syllabus import LearnerProfileRow, LearningPathRow, LearningModuleRow
+from koinonia_db.syllabus_service import generate_learning_path
 
 router = APIRouter()
-
-ORGAN_MAP = {
-    "I": "i-theoria",
-    "II": "ii-poiesis",
-    "III": "iii-ergon",
-    "IV": "iv-taxis",
-    "V": "v-logos",
-    "VI": "vi-koinonia",
-    "VII": "vii-kerygma",
-    "VIII": "viii-meta",
-}
-
-DIFFICULTY_ORDER = {"beginner": 0, "intermediate": 1, "advanced": 2}
-
-
-async def _generate_path(db_session, organs: list[str], level: str, name: str) -> dict:
-    """Generate a learning path from DB data and persist it."""
-    # Load taxonomy
-    roots = (await db_session.execute(
-        select(TaxonomyNodeRow).where(TaxonomyNodeRow.parent_id.is_(None))
-    )).scalars().all()
-
-    taxonomy = {}
-    for root in roots:
-        children = (await db_session.execute(
-            select(TaxonomyNodeRow).where(TaxonomyNodeRow.parent_id == root.id)
-        )).scalars().all()
-        taxonomy[root.slug] = {
-            "label": root.label,
-            "children": [{"slug": c.slug, "label": c.label} for c in children],
-        }
-
-    # Load readings
-    entries = (await db_session.execute(select(Entry))).scalars().all()
-    readings = [
-        {"title": e.title, "organ_tags": e.organ_tags or [], "difficulty": e.difficulty}
-        for e in entries
-    ]
-
-    # Build modules
-    if level == "beginner":
-        allowed = {"beginner", "intermediate"}
-    elif level == "intermediate":
-        allowed = {"intermediate", "advanced"}
-    else:
-        allowed = {"advanced"}
-
-    modules = []
-    for organ_code in organs:
-        organ_slug = ORGAN_MAP.get(organ_code, organ_code.lower())
-        organ_node = taxonomy.get(organ_slug)
-        if not organ_node:
-            continue
-
-        organ_readings = [
-            r for r in readings
-            if any(
-                tag.startswith(organ_slug.split("-")[0] + "-") or tag == organ_slug
-                for tag in r.get("organ_tags", [])
-            )
-        ]
-        filtered = [r for r in organ_readings if r.get("difficulty", "intermediate") in allowed]
-
-        for child in organ_node.get("children", []):
-            child_readings = [r["title"] for r in filtered][:3]
-            if not child_readings:
-                child_readings = [f"See {organ_node['label']} documentation"]
-
-            modules.append({
-                "module_id": f"{child['slug']}-{level[:3]}",
-                "title": child["label"],
-                "organ": organ_slug,
-                "difficulty": level,
-                "readings": child_readings,
-                "questions": [
-                    f"What is the core idea behind {child['label']}?",
-                    f"How does {child['label']} connect to {organ_node['label']}?",
-                    f"What would you build or explore using {child['label']}?",
-                ],
-                "estimated_hours": 2.0 if level != "advanced" else 3.0,
-            })
-
-    modules.sort(key=lambda m: DIFFICULTY_ORDER.get(m["difficulty"], 1))
-    total_hours = sum(m["estimated_hours"] for m in modules)
-
-    # Persist
-    path_id = uuid4().hex[:8]
-    learner = LearnerProfileRow(
-        name=name or "anonymous",
-        organs_of_interest=organs,
-        level=level,
-    )
-    db_session.add(learner)
-    await db_session.flush()
-
-    path_row = LearningPathRow(
-        path_id=path_id,
-        title=f"Learning Path: {', '.join(organs)}",
-        learner_id=learner.id,
-        total_hours=total_hours,
-    )
-    db_session.add(path_row)
-    await db_session.flush()
-
-    for i, mod in enumerate(modules):
-        db_session.add(LearningModuleRow(
-            path_id=path_row.id,
-            module_id=mod["module_id"],
-            title=mod["title"],
-            organ=mod["organ"],
-            difficulty=mod["difficulty"],
-            readings=mod["readings"],
-            questions=mod["questions"],
-            estimated_hours=mod["estimated_hours"],
-            seq=i,
-        ))
-
-    await db_session.commit()
-
-    return {
-        "path_id": path_id,
-        "title": path_row.title,
-        "organs": organs,
-        "level": level,
-        "total_hours": total_hours,
-        "modules": modules,
-    }
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.get("/syllabus")
@@ -149,6 +22,7 @@ async def syllabus_form(request: Request):
 
 
 @router.post("/syllabus/generate")
+@limiter.limit("10/minute")
 async def syllabus_generate(request: Request):
     """Generate a learning path from form submission."""
     templates = request.app.state.templates
@@ -164,7 +38,7 @@ async def syllabus_generate(request: Request):
         })
 
     async with request.app.state.db() as session:
-        path = await _generate_path(session, organs, level, name)
+        path = await generate_learning_path(session, organs, level, name)
 
     return templates.TemplateResponse("syllabus/path.html", {
         "request": request,
@@ -215,6 +89,7 @@ async def syllabus_view(request: Request, path_id: str):
 
 
 @router.get("/api/syllabus/generate")
+@limiter.limit("20/minute")
 async def api_syllabus_generate(
     request: Request,
     organs: str = "I",
@@ -231,6 +106,6 @@ async def api_syllabus_generate(
         return {"error": f"Level must be one of {valid_levels}"}
 
     async with request.app.state.db() as session:
-        path = await _generate_path(session, organ_list, level, name)
+        path = await generate_learning_path(session, organ_list, level, name)
 
     return path

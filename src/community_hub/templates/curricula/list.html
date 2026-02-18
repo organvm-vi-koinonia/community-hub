@@ -7,6 +7,7 @@
 <p>Multi-week structured reading programs with discussion questions, activities, and curated reading lists.</p>
 
 {% if curricula %}
+<p class="count">Showing {{ curricula|length }} of {{ total }} curricula</p>
 <div class="curriculum-list">
     {% for c in curricula %}
     <article class="curriculum-card">
@@ -22,6 +23,14 @@
     </article>
     {% endfor %}
 </div>
+<nav class="pagination">
+    {% if prev_offset is not none %}
+    <a href="/curricula/?limit={{ limit }}&offset={{ prev_offset }}" class="btn">&laquo; Previous</a>
+    {% endif %}
+    {% if next_offset is not none %}
+    <a href="/curricula/?limit={{ limit }}&offset={{ next_offset }}" class="btn">Next &raquo;</a>
+    {% endif %}
+</nav>
 {% else %}
 <p class="empty">No curricula available yet. Run seed to populate.</p>
 {% endif %}

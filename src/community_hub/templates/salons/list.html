@@ -7,6 +7,7 @@
 <p>Recorded sessions from community salons &mdash; deep dives, Socratic dialogues, and collaborative explorations.</p>
 
 {% if sessions %}
+<p class="count">Showing {{ sessions|length }} of {{ total }} sessions</p>
 <div class="session-list">
     {% for s in sessions %}
     <article class="session-card">
@@ -28,6 +29,14 @@
     </article>
     {% endfor %}
 </div>
+<nav class="pagination">
+    {% if prev_offset is not none %}
+    <a href="/salons/?limit={{ limit }}&offset={{ prev_offset }}" class="btn">&laquo; Previous</a>
+    {% endif %}
+    {% if next_offset is not none %}
+    <a href="/salons/?limit={{ limit }}&offset={{ next_offset }}" class="btn">Next &raquo;</a>
+    {% endif %}
+</nav>
 {% else %}
 <p class="empty">No salon sessions recorded yet. Check back soon.</p>
 {% endif %}

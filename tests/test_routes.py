@@ -21,6 +21,8 @@ def test_community_routes_importable():
     from community_hub.routes import community
     assert hasattr(community, "router")
     assert hasattr(community, "events_list")
+    assert hasattr(community, "contributors_list")
+    assert hasattr(community, "contributor_detail")
     assert hasattr(community, "stats")
 
 
@@ -49,11 +51,37 @@ def test_syllabus_routes_importable():
     assert hasattr(syllabus, "api_syllabus_generate")
 
 
+def test_feeds_routes_importable():
+    from community_hub.routes import feeds
+    assert hasattr(feeds, "router")
+    assert hasattr(feeds, "feed_salons")
+    assert hasattr(feeds, "feed_events")
+    assert hasattr(feeds, "feed_curricula")
+
+
+def test_live_routes_importable():
+    from community_hub.routes import live
+    assert hasattr(live, "router")
+    assert hasattr(live, "salon_live")
+    assert hasattr(live, "salon_ws")
+    assert hasattr(live, "RoomManager")
+    assert hasattr(live, "manager")
+
+
+def test_syllabus_uses_shared_service():
+    """syllabus.py should import from koinonia_db.syllabus_service, not define its own."""
+    from community_hub.routes import syllabus
+    import inspect
+    source = inspect.getsource(syllabus)
+    assert "from koinonia_db.syllabus_service import generate_learning_path" in source
+    assert "_generate_path" not in source
+
+
 def test_app_creates():
     from community_hub.app import create_app
     app = create_app()
     assert app.title == "ORGAN-VI Community Hub"
-    assert app.version == "0.2.0"
+    assert app.version == "0.4.0"
     routes = [r.path for r in app.routes]
     assert "/" in routes
 

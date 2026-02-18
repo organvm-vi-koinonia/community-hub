@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select, func, text
 
@@ -16,6 +17,13 @@ router = APIRouter()
 
 
 # ── Pydantic Response Models ─────────────────────────────────────────
+
+
+class PaginatedResponse(BaseModel):
+    items: list[Any]
+    total: int
+    limit: int
+    offset: int
 
 
 class SalonSummary(BaseModel):
@@ -80,6 +88,26 @@ class TaxonomyRoot(BaseModel):
     children: list[TaxonomyChild]
 
 
+class ContributionOut(BaseModel):
+    repo: str
+    type: str
+    url: str | None
+    date: str
+    description: str
+
+
+class ContributorOut(BaseModel):
+    github_handle: str
+    name: str
+    organs_active: list[str] = Field(default_factory=list)
+    first_contribution_date: str
+    contribution_count: int = 0
+
+
+class ContributorDetail(ContributorOut):
+    contributions: list[ContributionOut]
+
+
 class StatsOut(BaseModel):
     salons: int = Field(examples=[5])
     curricula: int = Field(examples=[3])
@@ -109,12 +137,24 @@ class ManifestOut(BaseModel):
 # ── Routes ───────────────────────────────────────────────────────────
 
 
-@router.get("/salons", response_model=list[SalonSummary])
-async def api_salons(request: Request):
+@router.get("/salons")
+async def api_salons(
+    request: Request,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
     async with request.app.state.db() as session:
-        stmt = select(SalonSessionRow).order_by(SalonSessionRow.date.desc())
+        total = (await session.execute(
+            select(func.count(SalonSessionRow.id))
+        )).scalar() or 0
+        stmt = (
+            select(SalonSessionRow)
+            .order_by(SalonSessionRow.date.desc())
+            .limit(limit)
+            .offset(offset)
+        )
         rows = (await session.execute(stmt)).scalars().all()
-    return [
+    items = [
         SalonSummary(
             id=r.id, title=r.title,
             date=r.date.isoformat() if r.date else None,
@@ -123,6 +163,7 @@ async def api_salons(request: Request):
         )
         for r in rows
     ]
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/salons/{session_id}", response_model=SalonDetail)
@@ -154,12 +195,19 @@ async def api_salon_detail(request: Request, session_id: int):
     )
 
 
-@router.get("/curricula", response_model=list[CurriculumSummary])
-async def api_curricula(request: Request):
+@router.get("/curricula")
+async def api_curricula(
+    request: Request,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
     async with request.app.state.db() as session:
-        stmt = select(Curriculum).order_by(Curriculum.id)
+        total = (await session.execute(
+            select(func.count(Curriculum.id))
+        )).scalar() or 0
+        stmt = select(Curriculum).order_by(Curriculum.id).limit(limit).offset(offset)
         rows = (await session.execute(stmt)).scalars().all()
-    return [
+    items = [
         CurriculumSummary(
             id=r.id, title=r.title, theme=r.theme,
             organ_focus=r.organ_focus, duration_weeks=r.duration_weeks,
@@ -167,6 +215,7 @@ async def api_curricula(request: Request):
         )
         for r in rows
     ]
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/curricula/{curriculum_id}", response_model=CurriculumDetail)
@@ -212,6 +261,65 @@ async def api_taxonomy(request: Request):
                 ],
             ))
     return result
+
+
+@router.get("/contributors")
+async def api_contributors(
+    request: Request,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
+    async with request.app.state.db() as session:
+        total = (await session.execute(
+            select(func.count(Contributor.id))
+        )).scalar() or 0
+        stmt = (
+            select(Contributor)
+            .order_by(Contributor.first_contribution_date.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        rows = (await session.execute(stmt)).scalars().all()
+    items = []
+    for c in rows:
+        items.append(ContributorOut(
+            github_handle=c.github_handle,
+            name=c.name,
+            organs_active=c.organs_active or [],
+            first_contribution_date=c.first_contribution_date.isoformat(),
+            contribution_count=0,
+        ))
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
+
+
+@router.get("/contributors/{handle}", response_model=ContributorDetail)
+async def api_contributor_detail(request: Request, handle: str):
+    async with request.app.state.db() as session:
+        stmt = select(Contributor).where(Contributor.github_handle == handle)
+        contributor = (await session.execute(stmt)).scalar_one_or_none()
+        if not contributor:
+            raise HTTPException(status_code=404, detail="Contributor not found")
+        stmt_c = (
+            select(Contribution)
+            .where(Contribution.contributor_id == contributor.id)
+            .order_by(Contribution.date.desc())
+        )
+        contributions = (await session.execute(stmt_c)).scalars().all()
+    return ContributorDetail(
+        github_handle=contributor.github_handle,
+        name=contributor.name,
+        organs_active=contributor.organs_active or [],
+        first_contribution_date=contributor.first_contribution_date.isoformat(),
+        contribution_count=len(contributions),
+        contributions=[
+            ContributionOut(
+                repo=c.repo, type=c.type,
+                url=c.url, date=c.date.isoformat(),
+                description=c.description,
+            )
+            for c in contributions
+        ],
+    )
 
 
 @router.get("/stats", response_model=StatsOut)
@@ -269,7 +377,7 @@ async def api_health_deep(request: Request):
             taxonomy_nodes=taxonomy_count,
             contributors=contributor_count,
         ),
-        version="0.2.0",
+        version="0.4.0",
     )
 
 
@@ -278,7 +386,7 @@ async def api_manifest(request: Request):
     """Organ manifest for ORGAN-IV orchestration registry."""
     base_url = str(request.base_url).rstrip("/")
     return ManifestOut(
-        version="0.2.0",
+        version="0.4.0",
         endpoints={
             "health": f"{base_url}/health",
             "health_deep": f"{base_url}/api/health/deep",
@@ -286,8 +394,12 @@ async def api_manifest(request: Request):
             "salons": f"{base_url}/api/salons",
             "curricula": f"{base_url}/api/curricula",
             "taxonomy": f"{base_url}/api/taxonomy",
+            "contributors": f"{base_url}/api/contributors",
             "search": f"{base_url}/api/search",
             "syllabus": f"{base_url}/api/syllabus/generate",
+            "feeds_salons": f"{base_url}/feeds/salons.xml",
+            "feeds_events": f"{base_url}/feeds/events.xml",
+            "feeds_curricula": f"{base_url}/feeds/curricula.xml",
             "openapi": f"{base_url}/openapi.json",
         },
         capabilities=[
@@ -297,5 +409,9 @@ async def api_manifest(request: Request):
             "fulltext_search",
             "adaptive_syllabus",
             "community_stats",
+            "contributor_profiles",
+            "atom_feeds",
+            "rate_limiting",
+            "websocket_live_salons",
         ],
     )

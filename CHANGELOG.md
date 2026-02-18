@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-02-17
+
+### Added
+- **AQUA COMMUNIS sprint** — live platform with real-time features
+- WebSocket live salon rooms (`/salons/{id}/live`, `/ws/salons/{id}`) with RoomManager, broadcast, and 30s keepalive
+- Atom 1.0 feeds: `/feeds/salons.xml`, `/feeds/events.xml`, `/feeds/curricula.xml` with autodiscovery links
+- Contributor profiles: `/community/contributors`, `/community/contributors/{handle}` (HTML + JSON API)
+- Pagination on all list endpoints (`limit`/`offset` query params, prev/next navigation)
+- Rate limiting via slowapi (`10/min` POST syllabus, `20/min` GET API syllabus)
+- 32 new integration tests (TestClient with mocked DB, WebSocket tests)
+- `/api/manifest` now reports 10 capabilities including `atom_feeds`, `rate_limiting`, `websocket_live_salons`
+
+### Changed
+- CORS now allows POST in addition to GET
+- Syllabus generation logic extracted to `koinonia_db.syllabus_service` (shared service)
+- `syllabus.py` reduced from 237 to 107 lines (deduplication)
+
+### Fixed
+- Version consistency across pyproject.toml, app.py, and test assertions
+
 ## [0.3.0] - 2026-02-17
 
 ### Added
@@ -57,6 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dockerfile and render.yaml for deployment
 - Test suite for config, routes, and app structure
 
-[Unreleased]: https://github.com/organvm-vi-koinonia/community-hub/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/organvm-vi-koinonia/community-hub/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/organvm-vi-koinonia/community-hub/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/organvm-vi-koinonia/community-hub/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/organvm-vi-koinonia/community-hub/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/organvm-vi-koinonia/community-hub/releases/tag/v0.1.0

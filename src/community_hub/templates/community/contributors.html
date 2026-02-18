@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Contributors &mdash; ORGAN-VI{% endblock %}
+
+{% block content %}
+<h1>Contributors</h1>
+<p>People building and shaping the eight-organ system.</p>
+
+{% if contributors %}
+<div class="contributor-list">
+    {% for c in contributors %}
+    <article class="contributor-card">
+        <h2><a href="/community/contributors/{{ c.github_handle }}">{{ c.name }}</a></h2>
+        <div class="meta">
+            <span class="handle">@{{ c.github_handle }}</span>
+            <span class="date">Since {{ c.first_contribution_date.strftime('%Y-%m-%d') if c.first_contribution_date else 'unknown' }}</span>
+        </div>
+        {% if c.organs_active %}
+        <div class="tags">
+            {% for tag in c.organs_active %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty">No contributors registered yet.</p>
+{% endif %}
+{% endblock %}

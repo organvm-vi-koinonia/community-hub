@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Live Salon #{{ session_id }} &mdash; ORGAN-VI{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/salons">Salons</a> / <a href="/salons/{{ session_id }}">Salon #{{ session_id }}</a> / Live
+</nav>
+
+<h1>Live Salon <span class="mono">#{{ session_id }}</span></h1>
+
+<div class="live-room" id="live-room">
+    <div class="live-status">
+        <span id="status-indicator" class="status-dot disconnected"></span>
+        <span id="status-text">Connecting&hellip;</span>
+        <span class="participant-count"><span id="count">{{ participant_count }}</span> connected</span>
+    </div>
+
+    <div class="chat-log" id="chat-log"></div>
+
+    <form id="chat-form" class="chat-input">
+        <input type="text" id="chat-message" placeholder="Type a message&hellip;" autocomplete="off" disabled>
+        <button type="submit" id="send-btn" disabled>Send</button>
+    </form>
+</div>
+
+<style>
+.live-room { max-width: 720px; margin: 2rem auto; }
+.live-status { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0; font-size: 0.85rem; color: var(--text-muted, #999); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.status-dot.connected { background: #4caf50; }
+.status-dot.disconnected { background: #f44336; }
+.participant-count { margin-left: auto; }
+.chat-log { border: 1px solid var(--border, #333); border-radius: 6px; height: 400px; overflow-y: auto; padding: 1rem; margin: 1rem 0; background: var(--bg-card, #1a1a24); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+.chat-log .msg { margin: 0.25rem 0; }
+.chat-log .msg.system { color: var(--text-muted, #999); font-style: italic; }
+.chat-log .msg .ts { color: var(--text-muted, #666); margin-right: 0.5rem; }
+.chat-input { display: flex; gap: 0.5rem; }
+.chat-input input { flex: 1; padding: 0.5rem; border: 1px solid var(--border, #333); border-radius: 4px; background: var(--bg-card, #1a1a24); color: var(--text, #eee); font-family: inherit; }
+.chat-input button { padding: 0.5rem 1.5rem; border: none; border-radius: 4px; background: var(--accent, #6366f1); color: white; cursor: pointer; font-family: inherit; }
+.chat-input button:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+
+<script>
+(function() {
+    var sessionId = {{ session_id }};
+    var log = document.getElementById('chat-log');
+    var form = document.getElementById('chat-form');
+    var input = document.getElementById('chat-message');
+    var sendBtn = document.getElementById('send-btn');
+    var statusDot = document.getElementById('status-indicator');
+    var statusText = document.getElementById('status-text');
+    var countEl = document.getElementById('count');
+
+    var wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var wsUrl = wsProto + '//' + location.host + '/ws/salons/' + sessionId;
+    var ws;
+    var pingInterval;
+
+    function addMessage(text, cls) {
+        var div = document.createElement('div');
+        div.className = 'msg' + (cls ? ' ' + cls : '');
+        div.textContent = text;
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function addTimestampedMessage(ts, text) {
+        var div = document.createElement('div');
+        div.className = 'msg';
+        var tsSpan = document.createElement('span');
+        tsSpan.className = 'ts';
+        tsSpan.textContent = '[' + ts + ']';
+        div.appendChild(tsSpan);
+        div.appendChild(document.createTextNode(' ' + text));
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function connect() {
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = function() {
+            statusDot.className = 'status-dot connected';
+            statusText.textContent = 'Connected';
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
+            pingInterval = setInterval(function() {
+                if (ws.readyState === WebSocket.OPEN) ws.send('ping');
+            }, 30000);
+        };
+
+        ws.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+            if (data.type === 'pong') return;
+            if (data.type === 'system') {
+                addMessage(data.text, 'system');
+                if (data.count !== undefined) countEl.textContent = data.count;
+            } else if (data.type === 'message') {
+                var ts = data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : '';
+                addTimestampedMessage(ts, data.text);
+            }
+        };
+
+        ws.onclose = function() {
+            clearInterval(pingInterval);
+            statusDot.className = 'status-dot disconnected';
+            statusText.textContent = 'Disconnected \u2014 reconnecting\u2026';
+            input.disabled = true;
+            sendBtn.disabled = true;
+            setTimeout(connect, 3000);
+        };
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var msg = input.value.trim();
+        if (!msg || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(msg);
+        input.value = '';
+        input.focus();
+    });
+
+    connect();
+})();
+</script>
+{% endblock %}

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy import select, func
 
 from koinonia_db.models.community import Event, Contributor, Contribution
@@ -21,6 +21,39 @@ async def events_list(request: Request):
     return templates.TemplateResponse("community/events.html", {
         "request": request,
         "events": events,
+    })
+
+
+@router.get("/contributors")
+async def contributors_list(request: Request):
+    templates = request.app.state.templates
+    async with request.app.state.db() as session:
+        stmt = select(Contributor).order_by(Contributor.first_contribution_date.desc())
+        contributors = (await session.execute(stmt)).scalars().all()
+    return templates.TemplateResponse("community/contributors.html", {
+        "request": request,
+        "contributors": contributors,
+    })
+
+
+@router.get("/contributors/{handle}")
+async def contributor_detail(request: Request, handle: str):
+    templates = request.app.state.templates
+    async with request.app.state.db() as session:
+        stmt = select(Contributor).where(Contributor.github_handle == handle)
+        contributor = (await session.execute(stmt)).scalar_one_or_none()
+        if not contributor:
+            raise HTTPException(status_code=404, detail="Contributor not found")
+        stmt_c = (
+            select(Contribution)
+            .where(Contribution.contributor_id == contributor.id)
+            .order_by(Contribution.date.desc())
+        )
+        contributions = (await session.execute(stmt_c)).scalars().all()
+    return templates.TemplateResponse("community/contributor_detail.html", {
+        "request": request,
+        "contributor": contributor,
+        "contributions": contributions,
     })
 
 

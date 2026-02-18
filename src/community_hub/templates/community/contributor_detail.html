@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ contributor.name }} &mdash; Contributors{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb"><a href="/community/contributors">Contributors</a> / {{ contributor.name }}</nav>
+
+<h1>{{ contributor.name }}</h1>
+<div class="meta">
+    <span class="handle">
+        <a href="https://github.com/{{ contributor.github_handle }}">@{{ contributor.github_handle }}</a>
+    </span>
+    <span class="date">Contributing since {{ contributor.first_contribution_date.strftime('%Y-%m-%d') if contributor.first_contribution_date else 'unknown' }}</span>
+</div>
+
+{% if contributor.organs_active %}
+<section class="organs">
+    <h2>Active Organs</h2>
+    <div class="tags">
+        {% for tag in contributor.organs_active %}
+        <span class="tag">{{ tag }}</span>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if contributions %}
+<section class="contributions">
+    <h2>Contributions ({{ contributions|length }})</h2>
+    <div class="contribution-list">
+        {% for c in contributions %}
+        <div class="contribution-item">
+            <span class="type">{{ c.type }}</span>
+            <span class="repo">{{ c.repo }}</span>
+            <span class="date">{{ c.date.strftime('%Y-%m-%d') if c.date else '' }}</span>
+            {% if c.description %}
+            <p>{{ c.description }}</p>
+            {% endif %}
+            {% if c.url %}
+            <a href="{{ c.url }}">View</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% else %}
+<p class="empty">No contributions recorded yet.</p>
+{% endif %}
+
+<div class="api-note">
+    <a href="/api/contributors/{{ contributor.github_handle }}">View as JSON</a>
+</div>
+{% endblock %}

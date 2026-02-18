@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
-from sqlalchemy import select
+from fastapi import APIRouter, HTTPException, Query, Request
+from sqlalchemy import select, func
 
 from koinonia_db.models.reading import Curriculum, ReadingSessionRow, DiscussionQuestion, Guide
 
@@ -11,15 +11,29 @@ router = APIRouter()
 
 
 @router.get("/")
-async def curricula_list(request: Request):
+async def curricula_list(
+    request: Request,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
     templates = request.app.state.templates
     async with request.app.state.db() as session:
-        stmt = select(Curriculum).order_by(Curriculum.id)
+        total = (await session.execute(
+            select(func.count(Curriculum.id))
+        )).scalar() or 0
+        stmt = select(Curriculum).order_by(Curriculum.id).limit(limit).offset(offset)
         result = await session.execute(stmt)
         curricula = result.scalars().all()
+    prev_offset = max(0, offset - limit) if offset > 0 else None
+    next_offset = offset + limit if offset + limit < total else None
     return templates.TemplateResponse("curricula/list.html", {
         "request": request,
         "curricula": curricula,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "prev_offset": prev_offset,
+        "next_offset": next_offset,
     })
 
 
