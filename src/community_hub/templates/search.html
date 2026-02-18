@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Search — ORGAN-VI Community Hub{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-bottom: 1.5rem;">
+    <h1>Search</h1>
+    <p class="subtitle">Full-text search across salons, transcripts, readings, and taxonomy</p>
+</section>
+
+<form class="search-box" action="/search" method="get">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search for recursion, governance, AI..." autofocus>
+    <button type="submit" class="btn">Search</button>
+</form>
+
+{% if query %}
+<p style="text-align: center; color: var(--fg-muted); margin-bottom: 2rem; font-size: 0.9rem;">
+    {{ total }} result{{ 's' if total != 1 else '' }} for &ldquo;{{ query }}&rdquo;
+</p>
+
+{% if results.salons %}
+<section class="search-category">
+    <h2>Salons ({{ results.salons|length }})</h2>
+    {% for r in results.salons %}
+    <div class="search-result">
+        <h3><a href="/salons/{{ r.id }}">{{ r.title }}</a></h3>
+        <p class="snippet">{{ r.headline | safe }}</p>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+{% if results.segments %}
+<section class="search-category">
+    <h2>Transcript Segments ({{ results.segments|length }})</h2>
+    {% for r in results.segments %}
+    <div class="search-result">
+        <h3><a href="/salons/{{ r.session_id }}">{{ r.session_title }}</a>
+            <span class="speaker-badge">{{ r.speaker }}</span>
+        </h3>
+        <p class="snippet">{{ r.headline | safe }}</p>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+{% if results.entries %}
+<section class="search-category">
+    <h2>Reading Entries ({{ results.entries|length }})</h2>
+    {% for r in results.entries %}
+    <div class="search-result">
+        <h3>{{ r.title }}</h3>
+        <p class="snippet">{{ r.headline | safe }} &middot; <span class="tag">{{ r.source_type }}</span></p>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+{% if results.taxonomy %}
+<section class="search-category">
+    <h2>Taxonomy Nodes ({{ results.taxonomy|length }})</h2>
+    {% for r in results.taxonomy %}
+    <div class="search-result">
+        <h3>{{ r.label }}</h3>
+        <p class="snippet">{{ r.headline | safe }} &middot; <span class="tag">{{ r.slug }}</span></p>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+{% if total == 0 %}
+<p class="empty" style="text-align: center; margin-top: 2rem;">No results found. Try a different query.</p>
+{% endif %}
+
+{% endif %}
+{% endblock %}

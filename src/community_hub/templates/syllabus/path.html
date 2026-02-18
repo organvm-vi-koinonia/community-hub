@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ path.title }} — ORGAN-VI Community Hub{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="/syllabus">Syllabus</a> &rsaquo; {{ path.title }}
+</div>
+
+<h1>{{ path.title }}</h1>
+<div class="meta">
+    <span>Level: <strong>{{ path.level }}</strong></span>
+    <span>Organs: <strong>{{ path.organs | join(', ') }}</strong></span>
+    <span>Total: <strong>{{ "%.1f" | format(path.total_hours) }}h</strong> across <strong>{{ path.modules | length }}</strong> modules</span>
+</div>
+<p style="color: var(--fg-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">
+    Path ID: <code>{{ path.path_id }}</code> &mdash;
+    <a href="/syllabus/{{ path.path_id }}">Permalink</a>
+</p>
+
+{% for module in path.modules %}
+<div class="module-card">
+    <h3>{{ loop.index }}. {{ module.title }}</h3>
+    <div class="module-meta">
+        <span class="tag">{{ module.organ }}</span>
+        <span class="status status-{{ module.difficulty }}">{{ module.difficulty }}</span>
+        <span>{{ module.estimated_hours }}h</span>
+    </div>
+    {% if module.readings %}
+    <div class="module-readings">
+        <h4>Readings</h4>
+        <ul>
+            {% for r in module.readings %}
+            <li>{{ r }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% if module.questions %}
+    <div class="module-questions">
+        <h4>Questions</h4>
+        <ul>
+            {% for q in module.questions %}
+            <li>{{ q }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+
+<div class="api-note">
+    <a href="/syllabus">Generate another path</a>
+</div>
+{% endblock %}

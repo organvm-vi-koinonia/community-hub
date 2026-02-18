@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-02-17
+
+### Added
+- **IGNIS KOINOS sprint** — production deployment infrastructure
+- Dark alchemical theme (Playfair Display + Inter + JetBrains Mono, gold/indigo accents)
+- SVG hexagonal favicon with organ numeral
+- Full-text search (`/search`, `/api/search`) using PostgreSQL tsvector with highlighted results
+- Adaptive syllabus generator (`/syllabus`, `/api/syllabus/generate`) with DB persistence
+- Structured JSON logging (`logging_config.py`) for production observability
+- HTML error pages with browser/API content negotiation
+- Alembic migrations in Docker entrypoint (runs before app start)
+- Cross-organ API: `/api/health/deep`, `/api/manifest`
+- Pydantic response models on all API endpoints
+- Organ-colored tags, card hover glow, transcript timeline styling
+
+### Changed
+- Render.yaml switched from `runtime: python` to `runtime: docker` for full build control
+- Dockerfile now installs git, clones koinonia-db for Alembic, uses entrypoint script
+- Version bumped to 0.2.0
+
 ## [0.2.0] - 2026-02-17
 
 ### Added

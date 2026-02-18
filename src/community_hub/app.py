@@ -2,18 +2,26 @@
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, Request
+from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 
 from community_hub.config import Settings
+from community_hub.logging_config import configure_logging
 from community_hub.routes import salons, curricula, community, api
+from community_hub.routes import search as search_routes
+from community_hub.routes import syllabus as syllabus_routes
+
+logger = logging.getLogger(__name__)
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 STATIC_DIR = Path(__file__).parent / "static"
@@ -25,21 +33,25 @@ SessionLocal: async_sessionmaker | None = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global engine, SessionLocal
+    configure_logging(debug=Settings.DEBUG)
+    logger.info("ORGAN-VI Community Hub starting", extra={"version": "0.2.0"})
     db_url = Settings.require_db()
     engine = create_async_engine(db_url, pool_size=5, max_overflow=10)
     SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
     app.state.engine = engine
     app.state.db = SessionLocal
+    logger.info("Database connection established")
     yield
     if engine:
         await engine.dispose()
+        logger.info("Database connection closed")
 
 
 def create_app() -> FastAPI:
     app = FastAPI(
         title="ORGAN-VI Community Hub",
         description="Community portal for salons, reading groups, and contributor stats",
-        version="0.1.0",
+        version="0.2.0",
         lifespan=lifespan,
     )
 
@@ -58,6 +70,44 @@ def create_app() -> FastAPI:
 
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
+    # Global exception handler — HTML for browsers, JSON for API clients
+    @app.exception_handler(HTTPException)
+    async def http_exception_handler(request: Request, exc: HTTPException):
+        accept = request.headers.get("accept", "")
+        if "text/html" in accept and not request.url.path.startswith("/api"):
+            return templates.TemplateResponse(
+                "error.html",
+                {
+                    "request": request,
+                    "status_code": exc.status_code,
+                    "detail": exc.detail,
+                },
+                status_code=exc.status_code,
+            )
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+        )
+
+    @app.exception_handler(Exception)
+    async def unhandled_exception_handler(request: Request, exc: Exception):
+        logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
+        accept = request.headers.get("accept", "")
+        if "text/html" in accept and not request.url.path.startswith("/api"):
+            return templates.TemplateResponse(
+                "error.html",
+                {
+                    "request": request,
+                    "status_code": 500,
+                    "detail": "Internal Server Error",
+                },
+                status_code=500,
+            )
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal Server Error"},
+        )
+
     @app.get("/health")
     async def health():
         return {"status": "ok"}
@@ -66,6 +116,8 @@ def create_app() -> FastAPI:
     app.include_router(curricula.router, prefix="/curricula", tags=["curricula"])
     app.include_router(community.router, prefix="/community", tags=["community"])
     app.include_router(api.router, prefix="/api", tags=["api"])
+    app.include_router(search_routes.router, tags=["search"])
+    app.include_router(syllabus_routes.router, tags=["syllabus"])
 
     @app.get("/")
     async def index(request: Request):
