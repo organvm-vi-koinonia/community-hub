@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, Request
@@ -10,8 +9,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select, func, text
 
 from koinonia_db.models.salon import SalonSessionRow, Participant, Segment, TaxonomyNodeRow
-from koinonia_db.models.reading import Curriculum, ReadingSessionRow, DiscussionQuestion, Guide
-from koinonia_db.models.community import Event, Contributor, Contribution
+from koinonia_db.models.reading import Curriculum, ReadingSessionRow
+from koinonia_db.models.community import Contributor, Contribution
 
 router = APIRouter()
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy import select, func
 
-from koinonia_db.models.salon import SalonSessionRow, Participant, Segment, TaxonomyNodeRow
+from koinonia_db.models.salon import SalonSessionRow, Participant, Segment
 
 router = APIRouter()
 

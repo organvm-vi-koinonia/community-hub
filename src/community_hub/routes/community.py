@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy import select, func
 
 from koinonia_db.models.community import Event, Contributor, Contribution
