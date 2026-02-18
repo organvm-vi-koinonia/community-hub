@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ reading_session.title if reading_session else 'Not Found' }} &mdash; Session{% endblock %}
+
+{% block content %}
+{% if reading_session %}
+<nav class="breadcrumb">
+    <a href="/curricula">Curricula</a> /
+    <a href="/curricula/{{ reading_session.curriculum_id }}">Curriculum</a> /
+    Week {{ reading_session.week }}
+</nav>
+
+<h1>Week {{ reading_session.week }}: {{ reading_session.title }}</h1>
+<div class="meta">
+    <span class="duration">{{ reading_session.duration_minutes }} minutes</span>
+    {% if reading_session.date_scheduled %}
+    <span class="date">{{ reading_session.date_scheduled }}</span>
+    {% endif %}
+</div>
+
+{% if questions %}
+<section class="questions">
+    <h2>Discussion Questions</h2>
+    <ol>
+        {% for q in questions %}
+        <li>{{ q.question_text }}</li>
+        {% endfor %}
+    </ol>
+</section>
+{% endif %}
+
+{% if guide %}
+<section class="guide">
+    <h2>Discussion Guide</h2>
+    {% if guide.opening_questions %}
+    <h3>Opening Questions</h3>
+    <ul>
+        {% for q in guide.opening_questions %}
+        <li>{{ q }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if guide.activities %}
+    <h3>Activities</h3>
+    <ul>
+        {% for a in guide.activities %}
+        <li>{{ a }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if guide.closing_reflection %}
+    <h3>Closing Reflection</h3>
+    <p>{{ guide.closing_reflection }}</p>
+    {% endif %}
+</section>
+{% endif %}
+{% else %}
+<h1>Session Not Found</h1>
+<p><a href="/curricula">Back to curricula</a></p>
+{% endif %}
+{% endblock %}

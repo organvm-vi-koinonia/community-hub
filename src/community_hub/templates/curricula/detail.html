@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{{ curriculum.title if curriculum else 'Not Found' }} &mdash; Curricula{% endblock %}
+
+{% block content %}
+{% if curriculum %}
+<nav class="breadcrumb"><a href="/curricula">Curricula</a> / {{ curriculum.title }}</nav>
+
+<h1>{{ curriculum.title }}</h1>
+<div class="meta">
+    <span class="duration">{{ curriculum.duration_weeks }} weeks</span>
+    <span class="theme">{{ curriculum.theme }}</span>
+    {% if curriculum.organ_focus %}
+    <span class="focus">{{ curriculum.organ_focus }}</span>
+    {% endif %}
+</div>
+
+<p>{{ curriculum.description }}</p>
+
+{% if sessions %}
+<section class="sessions">
+    <h2>Weekly Sessions</h2>
+    <ol class="session-list">
+        {% for s in sessions %}
+        <li>
+            <a href="/curricula/{{ curriculum.id }}/sessions/{{ s.id }}">
+                <strong>Week {{ s.week }}:</strong> {{ s.title }}
+            </a>
+            <span class="duration">({{ s.duration_minutes }} min)</span>
+            {% if s.completed %}<span class="completed">Completed</span>{% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+</section>
+{% endif %}
+
+<div class="api-note">
+    <a href="/api/curricula/{{ curriculum.id }}">View as JSON</a>
+</div>
+{% else %}
+<h1>Curriculum Not Found</h1>
+<p><a href="/curricula">Back to curriculum list</a></p>
+{% endif %}
+{% endblock %}

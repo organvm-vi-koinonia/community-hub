@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}{{ salon.title if salon else 'Not Found' }} &mdash; Salon Archive{% endblock %}
+
+{% block content %}
+{% if salon %}
+<nav class="breadcrumb"><a href="/salons">Salons</a> / {{ salon.title }}</nav>
+
+<h1>{{ salon.title }}</h1>
+<div class="meta">
+    <span class="date">{{ salon.date.strftime('%Y-%m-%d %H:%M') if salon.date else 'TBD' }}</span>
+    <span class="format">{{ salon.format }}</span>
+    {% if salon.facilitator %}
+    <span class="facilitator">Facilitated by {{ salon.facilitator }}</span>
+    {% endif %}
+</div>
+
+{% if salon.organ_tags %}
+<div class="tags">
+    {% for tag in salon.organ_tags %}
+    <span class="tag">{{ tag }}</span>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if salon.notes %}
+<section class="notes">
+    <h2>Session Notes</h2>
+    <p>{{ salon.notes }}</p>
+</section>
+{% endif %}
+
+{% if participants %}
+<section class="participants">
+    <h2>Participants</h2>
+    <ul>
+        {% for p in participants %}
+        <li>{{ p.name }} <span class="role">({{ p.role }})</span></li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+
+{% if segments %}
+<section class="transcript">
+    <h2>Transcript</h2>
+    {% for seg in segments %}
+    <div class="segment">
+        <span class="timestamp">[{{ '%d:%02d' % (seg.start_seconds // 60, seg.start_seconds % 60) }}]</span>
+        <strong>{{ seg.speaker }}:</strong>
+        <p>{{ seg.text }}</p>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+<div class="api-note">
+    <a href="/api/salons/{{ salon.id }}">View as JSON</a>
+</div>
+{% else %}
+<h1>Salon Not Found</h1>
+<p><a href="/salons">Back to salon list</a></p>
+{% endif %}
+{% endblock %}

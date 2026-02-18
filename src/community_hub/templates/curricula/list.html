@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Reading Curricula &mdash; ORGAN-VI{% endblock %}
+
+{% block content %}
+<h1>Reading Curricula</h1>
+<p>Multi-week structured reading programs with discussion questions, activities, and curated reading lists.</p>
+
+{% if curricula %}
+<div class="curriculum-list">
+    {% for c in curricula %}
+    <article class="curriculum-card">
+        <h2><a href="/curricula/{{ c.id }}">{{ c.title }}</a></h2>
+        <div class="meta">
+            <span class="duration">{{ c.duration_weeks }} weeks</span>
+            <span class="theme">{{ c.theme }}</span>
+            {% if c.organ_focus %}
+            <span class="focus">{{ c.organ_focus }}</span>
+            {% endif %}
+        </div>
+        <p>{{ c.description[:200] }}{% if c.description|length > 200 %}...{% endif %}</p>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty">No curricula available yet. Run seed to populate.</p>
+{% endif %}
+{% endblock %}

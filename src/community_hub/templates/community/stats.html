@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Community Stats &mdash; ORGAN-VI{% endblock %}
+
+{% block content %}
+<h1>Community Stats</h1>
+<p>System-wide metrics for ORGAN-VI Koinonia.</p>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-value">{{ stats.salons }}</span>
+        <span class="stat-label">Salons Recorded</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value">{{ stats.curricula }}</span>
+        <span class="stat-label">Reading Curricula</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value">{{ stats.reading_entries }}</span>
+        <span class="stat-label">Reading Entries</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value">{{ stats.taxonomy_nodes }}</span>
+        <span class="stat-label">Taxonomy Nodes</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value">{{ stats.contributors }}</span>
+        <span class="stat-label">Contributors</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value">{{ stats.events }}</span>
+        <span class="stat-label">Events</span>
+    </div>
+</div>
+
+<div class="api-note">
+    <a href="/api/stats">View as JSON</a> |
+    <a href="/api/taxonomy">Browse Taxonomy (JSON)</a>
+</div>
+{% endblock %}

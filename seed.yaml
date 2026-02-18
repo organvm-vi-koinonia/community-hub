@@ -1,0 +1,57 @@
+# seed.yaml — Automation Contract for organvm-vi-koinonia/community-hub
+# Schema: seed/v1.0
+# Generated: 2026-02-17
+# Category: flagship
+
+schema_version: "1.0"
+organ: VI
+organ_name: Community
+repo: community-hub
+org: organvm-vi-koinonia
+
+metadata:
+  implementation_status: PRODUCTION
+  tier: flagship
+  promotion_status: LOCAL
+  last_validated: "2026-02-17"
+  generated: "2026-02-17"
+  sprint: "DEEP-WIDE"
+
+agents:
+  - name: ci
+    trigger: on_push
+    workflow: .github/workflows/ci-python.yml
+    description: "Continuous integration pipeline"
+
+produces:
+  - type: web_application
+    format: html+json
+    description: "Community portal with salon archive, curricula browser, and stats dashboard"
+  - type: api
+    format: json
+    description: "REST API for salons, curricula, taxonomy, and community stats"
+
+consumes:
+  - repo: koinonia-db
+    org: organvm-vi-koinonia
+    type: package
+    description: "Shared database models and migrations"
+  - repo: salon-archive
+    org: organvm-vi-koinonia
+    type: data
+    description: "Salon session data and transcripts"
+  - repo: reading-group-curriculum
+    org: organvm-vi-koinonia
+    type: data
+    description: "Curriculum and reading list data"
+
+subscriptions:
+  - event: salon.recorded
+    source: ORGAN-VI
+    action: Display new salon in archive
+  - event: curriculum.created
+    source: ORGAN-VI
+    action: Display new curriculum
+  - event: essay.published
+    source: ORGAN-V
+    action: Update reading lists with new essay
