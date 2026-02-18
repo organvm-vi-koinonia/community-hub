@@ -6,7 +6,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
@@ -42,10 +43,24 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # CORS — origins configurable via ALLOWED_ORIGINS env var (comma-separated)
+    allowed_origins = Settings.ALLOWED_ORIGINS
+    if allowed_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=allowed_origins,
+            allow_methods=["GET"],
+            allow_headers=["*"],
+        )
+
     templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
     app.state.templates = templates
 
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+    @app.get("/health")
+    async def health():
+        return {"status": "ok"}
 
     app.include_router(salons.router, prefix="/salons", tags=["salons"])
     app.include_router(curricula.router, prefix="/curricula", tags=["curricula"])
@@ -53,8 +68,7 @@ def create_app() -> FastAPI:
     app.include_router(api.router, prefix="/api", tags=["api"])
 
     @app.get("/")
-    async def index(request: "fastapi.Request"):
-        from fastapi import Request as _R
+    async def index(request: Request):
         return templates.TemplateResponse("index.html", {"request": request})
 
     return app

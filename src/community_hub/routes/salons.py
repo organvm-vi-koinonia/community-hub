@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy import select
 
 from koinonia_db.models.salon import SalonSessionRow, Participant, Segment, TaxonomyNodeRow
@@ -29,12 +29,7 @@ async def salon_detail(request: Request, session_id: int):
     async with request.app.state.db() as session:
         salon = await session.get(SalonSessionRow, session_id)
         if not salon:
-            return templates.TemplateResponse("salons/detail.html", {
-                "request": request,
-                "salon": None,
-                "participants": [],
-                "segments": [],
-            })
+            raise HTTPException(status_code=404, detail="Salon not found")
         stmt_p = select(Participant).where(Participant.session_id == session_id)
         participants = (await session.execute(stmt_p)).scalars().all()
         stmt_s = select(Segment).where(

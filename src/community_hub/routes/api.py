@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
-from fastapi import Request
+from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy import select, func
 
 from koinonia_db.models.salon import SalonSessionRow, Participant, Segment, TaxonomyNodeRow
@@ -36,7 +35,7 @@ async def api_salon_detail(request: Request, session_id: int):
     async with request.app.state.db() as session:
         salon = await session.get(SalonSessionRow, session_id)
         if not salon:
-            return {"error": "not found"}
+            raise HTTPException(status_code=404, detail="Salon not found")
         stmt_p = select(Participant).where(Participant.session_id == session_id)
         participants = (await session.execute(stmt_p)).scalars().all()
         stmt_s = select(Segment).where(
@@ -90,7 +89,7 @@ async def api_curriculum_detail(request: Request, curriculum_id: int):
     async with request.app.state.db() as session:
         curriculum = await session.get(Curriculum, curriculum_id)
         if not curriculum:
-            return {"error": "not found"}
+            raise HTTPException(status_code=404, detail="Curriculum not found")
         stmt = select(ReadingSessionRow).where(
             ReadingSessionRow.curriculum_id == curriculum_id
         ).order_by(ReadingSessionRow.week)

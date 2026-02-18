@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy import select
 
 from koinonia_db.models.reading import Curriculum, ReadingSessionRow, DiscussionQuestion, Guide
@@ -29,11 +29,7 @@ async def curriculum_detail(request: Request, curriculum_id: int):
     async with request.app.state.db() as session:
         curriculum = await session.get(Curriculum, curriculum_id)
         if not curriculum:
-            return templates.TemplateResponse("curricula/detail.html", {
-                "request": request,
-                "curriculum": None,
-                "sessions": [],
-            })
+            raise HTTPException(status_code=404, detail="Curriculum not found")
         stmt = select(ReadingSessionRow).where(
             ReadingSessionRow.curriculum_id == curriculum_id
         ).order_by(ReadingSessionRow.week)
@@ -50,13 +46,8 @@ async def session_detail(request: Request, curriculum_id: int, session_id: int):
     templates = request.app.state.templates
     async with request.app.state.db() as session:
         reading_session = await session.get(ReadingSessionRow, session_id)
-        if not reading_session:
-            return templates.TemplateResponse("curricula/session.html", {
-                "request": request,
-                "reading_session": None,
-                "questions": [],
-                "guide": None,
-            })
+        if not reading_session or reading_session.curriculum_id != curriculum_id:
+            raise HTTPException(status_code=404, detail="Session not found")
         stmt_q = select(DiscussionQuestion).where(
             DiscussionQuestion.session_id == session_id
         )

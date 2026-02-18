@@ -2,10 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY koinonia-db/ ./koinonia-db/
-COPY community-hub/ ./community-hub/
+COPY . .
 
-RUN pip install --no-cache-dir ./koinonia-db ./community-hub
+RUN pip install --no-cache-dir \
+    "koinonia-db @ git+https://github.com/organvm-vi-koinonia/koinonia-db.git" \
+    .
 
 EXPOSE 8000
 

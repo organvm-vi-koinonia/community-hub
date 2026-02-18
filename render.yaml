@@ -2,11 +2,13 @@ services:
   - type: web
     name: community-hub
     runtime: python
-    buildCommand: pip install ../koinonia-db .
+    buildCommand: pip install "koinonia-db @ git+https://github.com/organvm-vi-koinonia/koinonia-db.git" .
     startCommand: uvicorn community_hub.app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         sync: false
+      - key: ALLOWED_ORIGINS
+        value: ""
       - key: PORT
         value: 8000
     plan: free
