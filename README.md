@@ -3,6 +3,9 @@
 ORGAN-VI flagship — the community portal for salons, reading groups, adaptive syllabi, and contributor profiles.
 
 [![CI](https://github.com/organvm-vi-koinonia/community-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/organvm-vi-koinonia/community-hub/actions/workflows/ci.yml)
+[![Deploy](https://img.shields.io/badge/render-live-46E3B7?style=flat-square&logo=render)](https://community-hub-8p8t.onrender.com)
+
+**Live:** https://community-hub-8p8t.onrender.com
 
 ## Overview
 
