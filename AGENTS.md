@@ -13,13 +13,13 @@ This repo participates in the **ORGAN-VI (Community)** swarm.
 - **Produce** `api` for unspecified
 
 ### External Dependencies
-- **Consume** `package` from `koinonia-db`
-- **Consume** `data` from `salon-archive`
-- **Consume** `data` from `reading-group-curriculum`
+- **Consume** `package` from `unspecified`
+- **Consume** `data` from `unspecified`
+- **Consume** `data` from `unspecified`
 
 ### Governance Constraints
 - Adhere to unidirectional flow: I→II→III
 - Never commit secrets or credentials
 
-*Last synced: 2026-02-24T01:01:15Z*
+*Last synced: 2026-02-24T12:41:28Z*
 <!-- ORGANVM:AUTO:END -->

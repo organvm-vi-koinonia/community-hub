@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-02-24
+
+### Added
+- `data_export` module — generates `data/api-routes.json` and `data/community-stats.json`
+- `community-data-export` CLI entry point
+- 5 new tests in `tests/test_data_export.py`
+- Produce edges fulfilled: `web_application` (html+json) and `api` (json)
+
 ## [0.4.0] - 2026-02-17
 
 ### Added

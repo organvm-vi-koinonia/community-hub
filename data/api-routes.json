@@ -1,0 +1,286 @@
+{
+  "generated_at": "2026-02-24T12:09:28.288324+00:00",
+  "route_count": 35,
+  "routes": [
+    {
+      "path": "/",
+      "methods": [
+        "GET"
+      ],
+      "name": "index",
+      "description": ""
+    },
+    {
+      "path": "/api/contributors",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_contributors",
+      "description": ""
+    },
+    {
+      "path": "/api/contributors/{handle}",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_contributor_detail",
+      "description": ""
+    },
+    {
+      "path": "/api/curricula",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_curricula",
+      "description": ""
+    },
+    {
+      "path": "/api/curricula/{curriculum_id}",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_curriculum_detail",
+      "description": ""
+    },
+    {
+      "path": "/api/health/deep",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_health_deep",
+      "description": "Deep health check \u2014 DB connectivity, data counts, organ metadata."
+    },
+    {
+      "path": "/api/manifest",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_manifest",
+      "description": "Organ manifest for ORGAN-IV orchestration registry."
+    },
+    {
+      "path": "/api/salons",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_salons",
+      "description": ""
+    },
+    {
+      "path": "/api/salons/{session_id}",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_salon_detail",
+      "description": ""
+    },
+    {
+      "path": "/api/search",
+      "methods": [
+        "GET"
+      ],
+      "name": "search_api",
+      "description": "JSON search API \u2014 cross-organ endpoint for ORGAN-IV consumption."
+    },
+    {
+      "path": "/api/stats",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_stats",
+      "description": ""
+    },
+    {
+      "path": "/api/syllabus/generate",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_syllabus_generate",
+      "description": "JSON API \u2014 generate a learning path. Organs as comma-separated string."
+    },
+    {
+      "path": "/api/taxonomy",
+      "methods": [
+        "GET"
+      ],
+      "name": "api_taxonomy",
+      "description": ""
+    },
+    {
+      "path": "/community/contributors",
+      "methods": [
+        "GET"
+      ],
+      "name": "contributors_list",
+      "description": ""
+    },
+    {
+      "path": "/community/contributors/{handle}",
+      "methods": [
+        "GET"
+      ],
+      "name": "contributor_detail",
+      "description": ""
+    },
+    {
+      "path": "/community/events",
+      "methods": [
+        "GET"
+      ],
+      "name": "events_list",
+      "description": ""
+    },
+    {
+      "path": "/community/stats",
+      "methods": [
+        "GET"
+      ],
+      "name": "stats",
+      "description": ""
+    },
+    {
+      "path": "/curricula/",
+      "methods": [
+        "GET"
+      ],
+      "name": "curricula_list",
+      "description": ""
+    },
+    {
+      "path": "/curricula/{curriculum_id}",
+      "methods": [
+        "GET"
+      ],
+      "name": "curriculum_detail",
+      "description": ""
+    },
+    {
+      "path": "/curricula/{curriculum_id}/sessions/{session_id}",
+      "methods": [
+        "GET"
+      ],
+      "name": "session_detail",
+      "description": ""
+    },
+    {
+      "path": "/docs",
+      "methods": [
+        "GET"
+      ],
+      "name": "swagger_ui_html",
+      "description": ""
+    },
+    {
+      "path": "/docs/oauth2-redirect",
+      "methods": [
+        "GET"
+      ],
+      "name": "swagger_ui_redirect",
+      "description": ""
+    },
+    {
+      "path": "/feeds/curricula.xml",
+      "methods": [
+        "GET"
+      ],
+      "name": "feed_curricula",
+      "description": "Atom feed of reading curricula."
+    },
+    {
+      "path": "/feeds/events.xml",
+      "methods": [
+        "GET"
+      ],
+      "name": "feed_events",
+      "description": "Atom feed of community events."
+    },
+    {
+      "path": "/feeds/salons.xml",
+      "methods": [
+        "GET"
+      ],
+      "name": "feed_salons",
+      "description": "Atom feed of salon sessions."
+    },
+    {
+      "path": "/health",
+      "methods": [
+        "GET"
+      ],
+      "name": "health",
+      "description": ""
+    },
+    {
+      "path": "/openapi.json",
+      "methods": [
+        "GET"
+      ],
+      "name": "openapi",
+      "description": ""
+    },
+    {
+      "path": "/redoc",
+      "methods": [
+        "GET"
+      ],
+      "name": "redoc_html",
+      "description": ""
+    },
+    {
+      "path": "/salons/",
+      "methods": [
+        "GET"
+      ],
+      "name": "salon_list",
+      "description": ""
+    },
+    {
+      "path": "/salons/{session_id}",
+      "methods": [
+        "GET"
+      ],
+      "name": "salon_detail",
+      "description": ""
+    },
+    {
+      "path": "/salons/{session_id}/live",
+      "methods": [
+        "GET"
+      ],
+      "name": "salon_live",
+      "description": "Render the live salon room page."
+    },
+    {
+      "path": "/search",
+      "methods": [
+        "GET"
+      ],
+      "name": "search_page",
+      "description": "HTML search page with categorized results."
+    },
+    {
+      "path": "/syllabus",
+      "methods": [
+        "GET"
+      ],
+      "name": "syllabus_form",
+      "description": "Show the syllabus generation form."
+    },
+    {
+      "path": "/syllabus/generate",
+      "methods": [
+        "POST"
+      ],
+      "name": "syllabus_generate",
+      "description": "Generate a learning path from form submission."
+    },
+    {
+      "path": "/syllabus/{path_id}",
+      "methods": [
+        "GET"
+      ],
+      "name": "syllabus_view",
+      "description": "View a previously generated learning path."
+    }
+  ]
+}
