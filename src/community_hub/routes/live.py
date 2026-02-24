@@ -102,10 +102,17 @@ manager = RoomManager()
 
 
 def _validate_token(token: str | None) -> bool:  # allow-secret
-    """Validate a session token. Accept any non-empty token for now.
+    """Validate a session token.
 
-    In production, replace with real session/JWT validation against your
-    auth backend.
+    SECURITY NOTE: This is a placeholder that accepts any string >= 8 chars.
+    Live rooms are effectively unauthenticated. This is acceptable while the
+    portal is public read-only with no private salons, but must be replaced
+    with real session/JWT validation before:
+      - private/invite-only salons are introduced
+      - user identity matters for message attribution
+      - any moderation features are added
+
+    See: https://github.com/organvm-vi-koinonia/community-hub/issues (track as E10)
     """
     return bool(token and len(token) >= 8)
 

@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy import text
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 async def _search_all(db_session, query: str) -> dict:
@@ -78,6 +81,7 @@ async def _search_all(db_session, query: str) -> dict:
 
 
 @router.get("/search")
+@limiter.limit("30/minute")
 async def search_page(request: Request, q: str = ""):
     """HTML search page with categorized results."""
     templates = request.app.state.templates
@@ -98,6 +102,7 @@ async def search_page(request: Request, q: str = ""):
 
 
 @router.get("/api/search")
+@limiter.limit("30/minute")
 async def search_api(request: Request, q: str = ""):
     """JSON search API — cross-organ endpoint for ORGAN-IV consumption."""
     results = {"salons": [], "segments": [], "entries": [], "taxonomy": []}

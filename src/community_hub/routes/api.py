@@ -6,6 +6,8 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, Field
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy import select, func, text
 
 from koinonia_db.models.salon import SalonSessionRow, Participant, Segment, TaxonomyNodeRow
@@ -13,6 +15,7 @@ from koinonia_db.models.reading import Curriculum, ReadingSessionRow
 from koinonia_db.models.community import Contributor, Contribution
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 # ── Pydantic Response Models ─────────────────────────────────────────
@@ -137,6 +140,7 @@ class ManifestOut(BaseModel):
 
 
 @router.get("/salons")
+@limiter.limit("60/minute")
 async def api_salons(
     request: Request,
     limit: int = Query(50, ge=1, le=200),
@@ -195,6 +199,7 @@ async def api_salon_detail(request: Request, session_id: int):
 
 
 @router.get("/curricula")
+@limiter.limit("60/minute")
 async def api_curricula(
     request: Request,
     limit: int = Query(50, ge=1, le=200),
@@ -239,6 +244,7 @@ async def api_curriculum_detail(request: Request, curriculum_id: int):
 
 
 @router.get("/taxonomy", response_model=list[TaxonomyRoot])
+@limiter.limit("60/minute")
 async def api_taxonomy(request: Request):
     async with request.app.state.db() as session:
         stmt = select(TaxonomyNodeRow).where(
@@ -263,6 +269,7 @@ async def api_taxonomy(request: Request):
 
 
 @router.get("/contributors")
+@limiter.limit("60/minute")
 async def api_contributors(
     request: Request,
     limit: int = Query(50, ge=1, le=200),
@@ -329,6 +336,7 @@ async def api_contributor_detail(request: Request, handle: str):
 
 
 @router.get("/stats", response_model=StatsOut)
+@limiter.limit("60/minute")
 async def api_stats(request: Request):
     async with request.app.state.db() as session:
         salon_count = (await session.execute(
