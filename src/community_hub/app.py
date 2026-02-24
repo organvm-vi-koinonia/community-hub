@@ -19,6 +19,7 @@ from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 
 from community_hub.config import Settings
+from community_hub.csrf import CSRFMiddleware
 from community_hub.logging_config import configure_logging
 from community_hub.routes import salons, curricula, community, api, feeds, live
 from community_hub.routes import search as search_routes
@@ -53,9 +54,25 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(
         title="ORGAN-VI Community Hub",
-        description="Community portal for salons, reading groups, and contributor stats",
+        description=(
+            "Community portal for the ORGANVM eight-organ system. "
+            "Browse archived salons, reading group curricula, community events, "
+            "contributor profiles, and generate personalized learning paths."
+        ),
         version="0.4.0",
         lifespan=lifespan,
+        openapi_tags=[
+            {"name": "api", "description": "JSON API endpoints for all community hub data"},
+            {"name": "salons", "description": "Browse archived salon sessions and transcripts"},
+            {"name": "curricula", "description": "Reading group curricula and sessions"},
+            {"name": "community", "description": "Events, contributors, and community stats"},
+            {"name": "search", "description": "Full-text search across all content"},
+            {"name": "syllabus", "description": "Personalized learning path generation"},
+            {"name": "feeds", "description": "Atom 1.0 syndication feeds"},
+            {"name": "live", "description": "WebSocket live salon rooms"},
+        ],
+        docs_url="/docs",
+        redoc_url="/redoc",
     )
 
     # CORS — origins configurable via ALLOWED_ORIGINS env var (comma-separated)
@@ -68,12 +85,20 @@ def create_app() -> FastAPI:
             allow_headers=["*"],
         )
 
+    # CSRF protection (double-submit cookie)
+    app.add_middleware(CSRFMiddleware)
+
     # Rate limiting
     limiter = Limiter(key_func=get_remote_address)
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
     templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
+    # Make csrf_token available in all templates via request.state
+    templates.env.globals["csrf_field"] = (
+        lambda request: f'<input type="hidden" name="csrf_token" '
+        f'value="{getattr(request.state, "csrf_token", "")}">'
+    )
     app.state.templates = templates
 
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")

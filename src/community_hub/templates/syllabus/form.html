@@ -13,6 +13,7 @@
 {% endif %}
 
 <form action="/syllabus/generate" method="post" style="max-width: 600px; margin: 0 auto;">
+    {{ csrf_field(request) }}
     <div class="form-group">
         <label>Your Name (optional)</label>
         <input type="text" name="name" placeholder="Anonymous learner">

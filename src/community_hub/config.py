@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import os
 
+from koinonia_db.config import require_database_url
+
 
 class Settings:
     DATABASE_URL: str = os.environ.get("DATABASE_URL", "")
@@ -18,9 +20,4 @@ class Settings:
 
     @classmethod
     def require_db(cls) -> str:
-        if not cls.DATABASE_URL:
-            raise RuntimeError("DATABASE_URL is not set")
-        url = cls.DATABASE_URL
-        if url.startswith("postgresql://") and "+psycopg" not in url:
-            url = url.replace("postgresql://", "postgresql+psycopg://", 1)
-        return url
+        return require_database_url()

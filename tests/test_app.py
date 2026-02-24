@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import os
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from community_hub.config import Settings
 
@@ -14,12 +16,12 @@ def test_settings_defaults():
 
 
 def test_settings_require_db_converts_url():
-    with patch.object(Settings, "DATABASE_URL", "postgresql://user:pass@host/db"):
+    with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host/db"}):
         url = Settings.require_db()
         assert url.startswith("postgresql+psycopg://")
 
 
 def test_settings_require_db_raises_without_url():
-    with patch.object(Settings, "DATABASE_URL", ""):
+    with patch.dict(os.environ, {}, clear=True):
         with pytest.raises(RuntimeError, match="DATABASE_URL"):
             Settings.require_db()

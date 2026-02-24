@@ -279,6 +279,13 @@ async def api_contributors(
             .offset(offset)
         )
         rows = (await session.execute(stmt)).scalars().all()
+        # Fetch contribution counts per contributor
+        count_stmt = (
+            select(Contribution.contributor_id, func.count(Contribution.id).label("cnt"))
+            .group_by(Contribution.contributor_id)
+        )
+        count_rows = (await session.execute(count_stmt)).all()
+        contrib_counts = {row.contributor_id: row.cnt for row in count_rows}
     items = []
     for c in rows:
         items.append(ContributorOut(
@@ -286,7 +293,7 @@ async def api_contributors(
             name=c.name,
             organs_active=c.organs_active or [],
             first_contribution_date=c.first_contribution_date.isoformat(),
-            contribution_count=0,
+            contribution_count=contrib_counts.get(c.id, 0),
         ))
     return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 

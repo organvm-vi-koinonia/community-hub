@@ -40,7 +40,12 @@ def client(mock_session):
 
         app.state.db = mock_db
         app.state.engine = None
-        app.state.templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
+        templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
+        templates.env.globals["csrf_field"] = (
+            lambda request: f'<input type="hidden" name="csrf_token" '
+            f'value="{getattr(request.state, "csrf_token", "")}">'
+        )
+        app.state.templates = templates
         yield
 
     app = create_app()
@@ -293,7 +298,7 @@ def test_live_salon_page(client):
 
 def test_websocket_connect_and_message(client):
     """WebSocket should accept connection and broadcast messages."""
-    with client.websocket_connect("/ws/salons/1") as ws:
+    with client.websocket_connect("/ws/salons/1?token=testtoken123") as ws:  # allow-secret
         # First message: system join notification
         data = ws.receive_json()
         assert data["type"] == "system"
@@ -310,7 +315,7 @@ def test_websocket_connect_and_message(client):
 
 def test_websocket_ping_pong(client):
     """WebSocket should respond to ping with pong."""
-    with client.websocket_connect("/ws/salons/2") as ws:
+    with client.websocket_connect("/ws/salons/2?token=testtoken123") as ws:  # allow-secret
         ws.receive_json()  # consume system join message
         ws.send_text("ping")
         data = ws.receive_json()
@@ -319,10 +324,10 @@ def test_websocket_ping_pong(client):
 
 def test_websocket_multiple_connections(client):
     """Two connections to same room should both receive broadcasts."""
-    with client.websocket_connect("/ws/salons/3") as ws1:
+    with client.websocket_connect("/ws/salons/3?token=testtoken123") as ws1:  # allow-secret
         ws1.receive_json()  # ws1 join
 
-        with client.websocket_connect("/ws/salons/3") as ws2:
+        with client.websocket_connect("/ws/salons/3?token=testtoken456") as ws2:  # allow-secret
             # ws1 sees ws2 join
             join1 = ws1.receive_json()
             assert join1["type"] == "system"
