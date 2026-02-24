@@ -12,8 +12,11 @@ org: organvm-vi-koinonia
 metadata:
   implementation_status: PRODUCTION
   tier: flagship
-  promotion_status: CANDIDATE
+  promotion_status: PUBLIC_PROCESS
   last_validated: "2026-02-24"
+  data_artifacts:
+    - data/api-routes.json
+    - data/community-stats.json
   generated: "2026-02-17"
   sprint: "DEEP-WIDE"
 
