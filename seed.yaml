@@ -13,7 +13,8 @@ metadata:
   implementation_status: PRODUCTION
   tier: flagship
   promotion_status: PUBLIC_PROCESS
-  last_validated: "2026-02-24"
+  deployment_url: "https://community-hub-8p8t.onrender.com"
+  last_validated: "2026-02-28"
   data_artifacts:
     - data/api-routes.json
     - data/community-stats.json
