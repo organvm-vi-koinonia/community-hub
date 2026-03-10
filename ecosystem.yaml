@@ -1,0 +1,8 @@
+schema_version: '1.0'
+repo: community-hub
+organ: VI
+display_name: "FastAPI flagship portal \u2014 salon archive, curricula browser, contributor\
+  \ profiles, full-text search, adaptive syllabus, Atom feeds, WebSocket live rooms"
+delivery:
+- platform: web_app
+  status: not_started
