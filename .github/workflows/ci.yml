@@ -35,5 +35,9 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/organvm-vi-koinonia/koinonia-db.git /tmp/koinonia-db
           cd /tmp/koinonia-db && alembic upgrade head || echo "::warning::Migration step failed"
+      - name: Type check with pyright
+        run: |
+          pip install pyright
+          pyright src/
       - run: python -m pytest tests/ -v || echo "::warning::pytest failed"
       - run: python -m ruff check src/ || echo "::warning::ruff check failed"

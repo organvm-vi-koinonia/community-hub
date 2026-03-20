@@ -1,8 +1,30 @@
 schema_version: '1.0'
 repo: community-hub
 organ: VI
-display_name: "FastAPI flagship portal \u2014 salon archive, curricula browser, contributor\
-  \ profiles, full-text search, adaptive syllabus, Atom feeds, WebSocket live rooms"
+display_name: "FastAPI flagship portal — salon archive, curricula, contributor profiles, search, WebSocket live rooms"
+
 delivery:
 - platform: web_app
+  status: live
+  priority: critical
+  notes: "Deployed at community-hub-8p8t.onrender.com"
+  next_action: "Monitor uptime and optimize cold start"
+- platform: api
+  status: live
+  priority: high
+  notes: "FastAPI backend with full-text search and Atom feeds"
+  next_action: "Add rate limiting and API documentation"
+
+community:
+- platform: web_portal
+  status: live
+  priority: critical
+  notes: "Contributor profiles, salon archive browsing, live rooms"
+  next_action: "Promote to community members and collect feedback"
+
+content:
+- platform: docs_site
   status: not_started
+  priority: high
+  notes: "API docs, contributor guide, community guidelines"
+  next_action: "Generate API docs from FastAPI OpenAPI spec"
