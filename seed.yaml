@@ -48,6 +48,18 @@ consumes:
     org: organvm-vi-koinonia
     type: data
     description: "Curriculum and reading list data"
+  - type: community-growth
+    source:
+      organ: ORGAN-III
+    description: "Product/consulting engagement material feeding community discussion and workshops"
+  - type: creative-community
+    source:
+      organ: ORGAN-II
+    description: "Creative works and generative art feeding community engagement and salon topics"
+  - type: theoretical-community
+    source:
+      organ: ORGAN-I
+    description: "Research outputs and theoretical frameworks feeding reading groups and curricula"
 
 subscriptions:
   - event: salon.recorded
