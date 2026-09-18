@@ -32,7 +32,10 @@ jobs:
       - run: uv sync --locked --extra dev
       - name: Run Alembic migrations
         run: |
-          git clone --depth 1 https://github.com/organvm-vi-koinonia/koinonia-db.git ../koinonia-db
+          git init ../koinonia-db
+          git -C ../koinonia-db remote add origin https://github.com/organvm-vi-koinonia/koinonia-db.git
+          git -C ../koinonia-db fetch --depth 1 origin 8414b2e0e1d6292585e43e0a020b8f3e6044b98f
+          git -C ../koinonia-db checkout --detach FETCH_HEAD
           cd ../koinonia-db && "$GITHUB_WORKSPACE/.venv/bin/alembic" upgrade head
       - name: Type check with pyright
         run: uv run pyright src/
