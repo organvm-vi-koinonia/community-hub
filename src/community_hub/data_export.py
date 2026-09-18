@@ -23,27 +23,19 @@ def extract_api_routes() -> list[dict[str, Any]]:
     app = create_app()
     routes: list[dict[str, Any]] = []
 
-    for route in app.routes:
-        # Skip Mount entries (static files) and catch-all
-        if not hasattr(route, "methods"):
-            continue
-        path = getattr(route, "path", "")
-        route_methods = getattr(route, "methods", None)
-        methods = sorted(route_methods - {"HEAD", "OPTIONS"}) if route_methods else []
-        if not methods:
-            continue
-        name = getattr(route, "name", "")
-        endpoint = getattr(route, "endpoint", None)
-        description = ""
-        if endpoint and endpoint.__doc__:
-            description = endpoint.__doc__.strip().split("\n")[0]
-
-        routes.append({
-            "path": path,
-            "methods": methods,
-            "name": name,
-            "description": description,
-        })
+    # FastAPI 0.139 keeps included routers as lazy private wrapper objects, so
+    # app.routes is no longer a flattened public inventory. OpenAPI remains the
+    # supported, fully expanded representation of HTTP routes.
+    for path, operations in app.openapi()["paths"].items():
+        for method, operation in operations.items():
+            if method.upper() in {"HEAD", "OPTIONS", "PARAMETERS"}:
+                continue
+            routes.append({
+                "path": path,
+                "methods": [method.upper()],
+                "name": operation.get("operationId", ""),
+                "description": operation.get("description", "").split("\n")[0],
+            })
 
     # Sort by path for deterministic output
     routes.sort(key=lambda r: r["path"])

@@ -9,7 +9,6 @@ Preserved: the original import-and-structure checks at the bottom.
 
 from __future__ import annotations
 
-import asyncio
 import inspect
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timezone
@@ -1635,14 +1634,14 @@ def test_app_creates():
     app = create_app()
     assert app.title == "ORGAN-VI Community Hub"
     assert app.version == "0.4.0"
-    routes = [r.path for r in app.routes]
+    routes = list(app.openapi()["paths"])
     assert "/" in routes
 
 
 def test_app_has_all_routers():
     from community_hub.app import create_app
     app = create_app()
-    routes = [r.path for r in app.routes]
+    routes = list(app.openapi()["paths"])
     assert "/health" in routes
     assert "/salons" in routes or "/salons/" in routes
     assert "/search" in routes or "/search/" in routes

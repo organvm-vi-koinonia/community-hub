@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-02-24T12:09:28.288324+00:00",
-  "route_count": 35,
+  "generated_at": "2026-09-18T18:28:10.439263+00:00",
+  "route_count": 31,
   "routes": [
     {
       "path": "/",
       "methods": [
         "GET"
       ],
-      "name": "index",
+      "name": "index__get",
       "description": ""
     },
     {
@@ -15,7 +15,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_contributors",
+      "name": "api_contributors_api_contributors_get",
       "description": ""
     },
     {
@@ -23,7 +23,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_contributor_detail",
+      "name": "api_contributor_detail_api_contributors__handle__get",
       "description": ""
     },
     {
@@ -31,7 +31,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_curricula",
+      "name": "api_curricula_api_curricula_get",
       "description": ""
     },
     {
@@ -39,7 +39,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_curriculum_detail",
+      "name": "api_curriculum_detail_api_curricula__curriculum_id__get",
       "description": ""
     },
     {
@@ -47,7 +47,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_health_deep",
+      "name": "api_health_deep_api_health_deep_get",
       "description": "Deep health check \u2014 DB connectivity, data counts, organ metadata."
     },
     {
@@ -55,7 +55,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_manifest",
+      "name": "api_manifest_api_manifest_get",
       "description": "Organ manifest for ORGAN-IV orchestration registry."
     },
     {
@@ -63,7 +63,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_salons",
+      "name": "api_salons_api_salons_get",
       "description": ""
     },
     {
@@ -71,7 +71,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_salon_detail",
+      "name": "api_salon_detail_api_salons__session_id__get",
       "description": ""
     },
     {
@@ -79,7 +79,7 @@
       "methods": [
         "GET"
       ],
-      "name": "search_api",
+      "name": "search_api_api_search_get",
       "description": "JSON search API \u2014 cross-organ endpoint for ORGAN-IV consumption."
     },
     {
@@ -87,7 +87,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_stats",
+      "name": "api_stats_api_stats_get",
       "description": ""
     },
     {
@@ -95,7 +95,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_syllabus_generate",
+      "name": "api_syllabus_generate_api_syllabus_generate_get",
       "description": "JSON API \u2014 generate a learning path. Organs as comma-separated string."
     },
     {
@@ -103,7 +103,7 @@
       "methods": [
         "GET"
       ],
-      "name": "api_taxonomy",
+      "name": "api_taxonomy_api_taxonomy_get",
       "description": ""
     },
     {
@@ -111,7 +111,7 @@
       "methods": [
         "GET"
       ],
-      "name": "contributors_list",
+      "name": "contributors_list_community_contributors_get",
       "description": ""
     },
     {
@@ -119,7 +119,7 @@
       "methods": [
         "GET"
       ],
-      "name": "contributor_detail",
+      "name": "contributor_detail_community_contributors__handle__get",
       "description": ""
     },
     {
@@ -127,7 +127,7 @@
       "methods": [
         "GET"
       ],
-      "name": "events_list",
+      "name": "events_list_community_events_get",
       "description": ""
     },
     {
@@ -135,7 +135,7 @@
       "methods": [
         "GET"
       ],
-      "name": "stats",
+      "name": "stats_community_stats_get",
       "description": ""
     },
     {
@@ -143,7 +143,7 @@
       "methods": [
         "GET"
       ],
-      "name": "curricula_list",
+      "name": "curricula_list_curricula__get",
       "description": ""
     },
     {
@@ -151,7 +151,7 @@
       "methods": [
         "GET"
       ],
-      "name": "curriculum_detail",
+      "name": "curriculum_detail_curricula__curriculum_id__get",
       "description": ""
     },
     {
@@ -159,23 +159,7 @@
       "methods": [
         "GET"
       ],
-      "name": "session_detail",
-      "description": ""
-    },
-    {
-      "path": "/docs",
-      "methods": [
-        "GET"
-      ],
-      "name": "swagger_ui_html",
-      "description": ""
-    },
-    {
-      "path": "/docs/oauth2-redirect",
-      "methods": [
-        "GET"
-      ],
-      "name": "swagger_ui_redirect",
+      "name": "session_detail_curricula__curriculum_id__sessions__session_id__get",
       "description": ""
     },
     {
@@ -183,7 +167,7 @@
       "methods": [
         "GET"
       ],
-      "name": "feed_curricula",
+      "name": "feed_curricula_feeds_curricula_xml_get",
       "description": "Atom feed of reading curricula."
     },
     {
@@ -191,7 +175,7 @@
       "methods": [
         "GET"
       ],
-      "name": "feed_events",
+      "name": "feed_events_feeds_events_xml_get",
       "description": "Atom feed of community events."
     },
     {
@@ -199,7 +183,7 @@
       "methods": [
         "GET"
       ],
-      "name": "feed_salons",
+      "name": "feed_salons_feeds_salons_xml_get",
       "description": "Atom feed of salon sessions."
     },
     {
@@ -207,23 +191,7 @@
       "methods": [
         "GET"
       ],
-      "name": "health",
-      "description": ""
-    },
-    {
-      "path": "/openapi.json",
-      "methods": [
-        "GET"
-      ],
-      "name": "openapi",
-      "description": ""
-    },
-    {
-      "path": "/redoc",
-      "methods": [
-        "GET"
-      ],
-      "name": "redoc_html",
+      "name": "health_health_get",
       "description": ""
     },
     {
@@ -231,7 +199,7 @@
       "methods": [
         "GET"
       ],
-      "name": "salon_list",
+      "name": "salon_list_salons__get",
       "description": ""
     },
     {
@@ -239,7 +207,7 @@
       "methods": [
         "GET"
       ],
-      "name": "salon_detail",
+      "name": "salon_detail_salons__session_id__get",
       "description": ""
     },
     {
@@ -247,7 +215,7 @@
       "methods": [
         "GET"
       ],
-      "name": "salon_live",
+      "name": "salon_live_salons__session_id__live_get",
       "description": "Render the live salon room page."
     },
     {
@@ -255,7 +223,7 @@
       "methods": [
         "GET"
       ],
-      "name": "search_page",
+      "name": "search_page_search_get",
       "description": "HTML search page with categorized results."
     },
     {
@@ -263,7 +231,7 @@
       "methods": [
         "GET"
       ],
-      "name": "syllabus_form",
+      "name": "syllabus_form_syllabus_get",
       "description": "Show the syllabus generation form."
     },
     {
@@ -271,7 +239,7 @@
       "methods": [
         "POST"
       ],
-      "name": "syllabus_generate",
+      "name": "syllabus_generate_syllabus_generate_post",
       "description": "Generate a learning path from form submission."
     },
     {
@@ -279,7 +247,7 @@
       "methods": [
         "GET"
       ],
-      "name": "syllabus_view",
+      "name": "syllabus_view_syllabus__path_id__get",
       "description": "View a previously generated learning path."
     }
   ]

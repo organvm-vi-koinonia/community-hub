@@ -18,7 +18,7 @@ limiter = Limiter(key_func=get_remote_address)
 async def syllabus_form(request: Request):
     """Show the syllabus generation form."""
     templates = request.app.state.templates
-    return templates.TemplateResponse("syllabus/form.html", {"request": request})
+    return templates.TemplateResponse(request, "syllabus/form.html")
 
 
 @router.post("/syllabus/generate")
@@ -32,16 +32,14 @@ async def syllabus_generate(request: Request):
     name = str(form.get("name", "anonymous"))
 
     if not organs:
-        return templates.TemplateResponse("syllabus/form.html", {
-            "request": request,
+        return templates.TemplateResponse(request, "syllabus/form.html", {
             "error": "Select at least one organ.",
         })
 
     async with request.app.state.db() as session:
         path = await generate_learning_path(session, organs, level, name)
 
-    return templates.TemplateResponse("syllabus/path.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "syllabus/path.html", {
         "path": path,
     })
 
@@ -82,8 +80,7 @@ async def syllabus_view(request: Request, path_id: str):
         ],
     }
 
-    return templates.TemplateResponse("syllabus/path.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "syllabus/path.html", {
         "path": path,
     })
 

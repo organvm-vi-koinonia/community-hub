@@ -26,8 +26,7 @@ async def curricula_list(
         curricula = result.scalars().all()
     prev_offset = max(0, offset - limit) if offset > 0 else None
     next_offset = offset + limit if offset + limit < total else None
-    return templates.TemplateResponse("curricula/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "curricula/list.html", {
         "curricula": curricula,
         "total": total,
         "limit": limit,
@@ -48,8 +47,7 @@ async def curriculum_detail(request: Request, curriculum_id: int):
             ReadingSessionRow.curriculum_id == curriculum_id
         ).order_by(ReadingSessionRow.week)
         sessions = (await session.execute(stmt)).scalars().all()
-    return templates.TemplateResponse("curricula/detail.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "curricula/detail.html", {
         "curriculum": curriculum,
         "sessions": sessions,
     })
@@ -68,8 +66,7 @@ async def session_detail(request: Request, curriculum_id: int, session_id: int):
         questions = (await session.execute(stmt_q)).scalars().all()
         stmt_g = select(Guide).where(Guide.session_id == session_id)
         guide = (await session.execute(stmt_g)).scalar()
-    return templates.TemplateResponse("curricula/session.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "curricula/session.html", {
         "reading_session": reading_session,
         "questions": questions,
         "guide": guide,
