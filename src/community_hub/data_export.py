@@ -23,27 +23,35 @@ def extract_api_routes() -> list[dict[str, Any]]:
     app = create_app()
     routes: list[dict[str, Any]] = []
 
-    for route in app.routes:
-        # Skip Mount entries (static files) and catch-all
-        if not hasattr(route, "methods"):
-            continue
-        path = getattr(route, "path", "")
+    def visit(route: Any, prefix: str = "") -> None:
+        # FastAPI 0.139 represents included routers as lazy wrappers instead of
+        # flattening them into app.routes. Walk their original routers while
+        # retaining support for older flattened route lists.
+        original_router = getattr(route, "original_router", None)
+        include_context = getattr(route, "include_context", None)
+        if original_router is not None and include_context is not None:
+            child_prefix = prefix + getattr(include_context, "prefix", "")
+            for child in original_router.routes:
+                visit(child, child_prefix)
+            return
+
         route_methods = getattr(route, "methods", None)
         methods = sorted(route_methods - {"HEAD", "OPTIONS"}) if route_methods else []
         if not methods:
-            continue
-        name = getattr(route, "name", "")
+            return
         endpoint = getattr(route, "endpoint", None)
         description = ""
         if endpoint and endpoint.__doc__:
             description = endpoint.__doc__.strip().split("\n")[0]
-
         routes.append({
-            "path": path,
+            "path": prefix + getattr(route, "path", ""),
             "methods": methods,
-            "name": name,
+            "name": getattr(route, "name", ""),
             "description": description,
         })
+
+    for route in app.routes:
+        visit(route)
 
     # Sort by path for deterministic output
     routes.sort(key=lambda r: r["path"])
